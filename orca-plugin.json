@@ -1,0 +1,61 @@
+{
+  "manifestVersion": 2,
+  "id": "clickup",
+  "name": "ClickUp",
+  "version": "0.1.0",
+  "description": "Find your ClickUp tasks in a sidebar panel and start an Orca worktree, and optionally an agent, from a task.",
+  "author": {
+    "name": "Austin Chappell"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/austinChappell/orca-clickup-plugin",
+  "engines": {
+    "orca": ">=1.4.248"
+  },
+  "execution": "trusted-worker",
+  "pluginApi": 1,
+  "main": "src/worker.ts",
+  "contributes": {
+    "panels": [
+      {
+        "id": "clickup",
+        "title": "ClickUp",
+        "icon": "check",
+        "entry": "src/panel.tsx",
+        "ui": "components"
+      }
+    ],
+    "settings": [
+      {
+        "key": "startStatus",
+        "title": "Status after worktree start",
+        "description": "The plugin sets the task to this ClickUp status after it creates a worktree, for example \"in progress\". Keep it empty to not change the status.",
+        "type": "string",
+        "default": "",
+        "placeholder": "in progress"
+      },
+      {
+        "key": "promptTemplate",
+        "title": "Agent prompt",
+        "description": "The first prompt for the agent. Placeholders: {id}, {name}, {url}, {status}, {list} and {description}. Keep it empty to use the default prompt.",
+        "type": "string",
+        "default": "",
+        "multiline": true
+      },
+      {
+        "key": "orcaCliPath",
+        "title": "Orca CLI path",
+        "description": "The path of the orca command. Keep it empty to use the Orca app bundle or the orca command on PATH.",
+        "type": "string",
+        "default": ""
+      }
+    ]
+  },
+  "capabilities": [
+    { "kind": "storage:own" },
+    { "kind": "secrets:own" },
+    { "kind": "settings:own" },
+    { "kind": "workspace:read" },
+    { "kind": "workspace:write" }
+  ]
+}
