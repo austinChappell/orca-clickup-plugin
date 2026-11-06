@@ -48,6 +48,14 @@
         "description": "The path of the orca command. Keep it empty to use the Orca app bundle or the orca command on PATH.",
         "type": "string",
         "default": ""
+      },
+      {
+        "key": "caCertsPath",
+        "title": "CA certificates file",
+        "description": "The path of a PEM file with extra CA certificates to trust, for networks that inspect TLS traffic. Orca does not give NODE_EXTRA_CA_CERTS to plugins, so set the same file here. Keep it empty to use only the default certificates.",
+        "type": "string",
+        "default": "",
+        "placeholder": "/Users/you/.certs/company-ca.pem"
       }
     ]
   },

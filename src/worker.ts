@@ -12,6 +12,7 @@ import {
   worktreeName,
   type FetchLike
 } from './clickup'
+import { applyCaFile } from './ca'
 import { resolveOrcaCli, runOrca, type RunOrca } from './orca-cli'
 import { NO_FILTERS, type AuthState, type ClickUpUser, type LinkedWorktree, type Repo, type StatusOption, type TaskDetail } from './protocol'
 
@@ -57,10 +58,16 @@ export default function activate(orca: OrcaWorkerApi): void {
     return { connected: Boolean(token), user: token ? user : null, secretsAvailable: await secretsAvailable() }
   }
 
+  /** Calls deps.fetch after it applies the CA certificates setting. */
+  const fetchClickUp: FetchLike = async (url, init) => {
+    await applyCaFile(await setting('caCertsPath'))
+    return deps.fetch(url, init)
+  }
+
   async function client(): Promise<ClickUpClient> {
     const token = await orca.secrets.get(TOKEN)
     if (!token) throw new PluginError('not_connected', 'No ClickUp token is stored. Connect ClickUp in the panel.')
-    return new ClickUpClient(token, deps.fetch)
+    return new ClickUpClient(token, fetchClickUp)
   }
 
   async function currentUser(api: ClickUpClient): Promise<ClickUpUser> {
@@ -93,7 +100,7 @@ export default function activate(orca: OrcaWorkerApi): void {
     const value = token.trim()
     if (value === '') throw new PluginError('invalid_token', 'Type a ClickUp personal API token.')
     // Check the token before it is stored.
-    const user = await new ClickUpClient(value, deps.fetch).user()
+    const user = await new ClickUpClient(value, fetchClickUp).user()
     await orca.secrets.set(TOKEN, value)
     await orca.storage.set(USER, user as never)
     const state = await authState()
