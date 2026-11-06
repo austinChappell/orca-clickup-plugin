@@ -200,6 +200,27 @@ export function toTaskDetail(raw: unknown): TaskDetail {
 // ---------------------------------------------------------------------------
 // Client
 
+const CERT_ERRORS = new Set([
+  'SELF_SIGNED_CERT_IN_CHAIN',
+  'DEPTH_ZERO_SELF_SIGNED_CERT',
+  'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
+  'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+  'CERT_UNTRUSTED'
+])
+
+/** Describes a fetch error. Node puts the real reason, for example a certificate error, in `cause`. */
+export function networkDetail(error: unknown): string {
+  const message = (error as Error)?.message ?? String(error)
+  const cause = (error as { cause?: { code?: unknown; message?: unknown } })?.cause
+  const code = typeof cause?.code === 'string' ? cause.code : null
+  const detail = code ?? (typeof cause?.message === 'string' ? cause.message : null)
+  const text = detail ? `${message} (${detail})` : message
+  if (code && CERT_ERRORS.has(code)) {
+    return `${text}. Your network may inspect TLS traffic. Set "CA certificates file" in Settings → Plugins → ClickUp to your company's CA bundle.`
+  }
+  return text
+}
+
 export class ClickUpClient {
   constructor(
     private readonly token: string,
@@ -215,7 +236,7 @@ export class ClickUpClient {
         body: init.body === undefined ? undefined : JSON.stringify(init.body)
       })
     } catch (error) {
-      throw new PluginError('network_error', `Cannot connect to ClickUp: ${(error as Error).message}`)
+      throw new PluginError('network_error', `Cannot connect to ClickUp: ${networkDetail(error)}`)
     }
     if (response.status === 401) {
       throw new PluginError('unauthorized', 'ClickUp refused the token. Connect again with a valid personal API token.')

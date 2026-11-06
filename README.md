@@ -33,6 +33,7 @@ Find them in Orca **Settings → Plugins → ClickUp**.
 | Status after worktree start | empty | The status to set on the task after the worktree is ready. Empty means no change. |
 | Agent prompt | empty | The first prompt for the agent. Placeholders: `{id}`, `{name}`, `{url}`, `{status}`, `{list}`, `{description}`. Empty means the default prompt in `src/clickup.ts`. |
 | Orca CLI path | empty | The path of the `orca` command. Empty means the app bundle on macOS, or `orca` on `PATH`. |
+| CA certificates file | empty | The path of a PEM file with extra CA certificates to trust. Use it on a network that inspects TLS traffic. Orca does not give `NODE_EXTRA_CA_CERTS` to plugins, so set the same file here. Empty means only the default certificates. |
 
 ## How it works
 
@@ -44,6 +45,7 @@ Find them in Orca **Settings → Plugins → ClickUp**.
 | `src/worker.ts` | The Node worker. It keeps the token, calls ClickUp and creates worktrees. |
 | `src/clickup.ts` | The ClickUp REST API v2 client and pure helpers. |
 | `src/orca-cli.ts` | Runs the `orca` CLI. |
+| `src/ca.ts` | Adds the certificates from the CA certificates file to the trusted certificates. |
 | `src/protocol.ts` | The request types that the panel and the worker share. |
 
 The plugin host API cannot create a worktree. For this reason, the worker runs `orca worktree create --json`. Orca accepts only PR, MR and issue URLs from known providers as worktree references. For this reason, the plugin writes the ClickUp link into the worktree comment and the agent prompt.
